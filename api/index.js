@@ -21,7 +21,9 @@ app.use(cors());
 /* ---------- Connect once, reuse ---------- */
 let connPromise;
 async function connectDB() {
-  if (connPromise) return connPromise;         // reuse on warm starts
+  if (connPromise) return connPromise; 
+  console.log('DEBUG • about to connect, URI starts with:', MONGO_URI.slice(0, 40));
+        // reuse on warm starts
   console.log('DEBUG • Connecting to Mongo…');
   connPromise = mongoose.connect(MONGO_URI, {
     serverSelectionTimeoutMS: 8000,
