@@ -12,11 +12,9 @@
             "dest": "api/index.js"
         }
     ],
-
     "functions": {
         "api/index.js": {
-            "maxDuration": 30 // allow up to 30 s (was 10 s)
+            "maxDuration": 30
         }
     }
 }
-
