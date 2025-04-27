@@ -1,11 +1,9 @@
 // api/index.js
 require('dotenv').config();
 
-/* ---------- DEBUG ---------- */
 const MONGO_URI = process.env.MONGODB_URI;
 console.log('DEBUG • Loaded URI:', MONGO_URI || 'undefined');
 if (!MONGO_URI) throw new Error('MONGODB_URI is missing');
-/* --------------------------- */
 
 const express    = require('express');
 const mongoose   = require('mongoose');
@@ -16,11 +14,11 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
-/* ---------- Connect once ---------- */
+/* ---------- Connect once, reuse ---------- */
 let connPromise;
 async function connectDB() {
   if (connPromise) return connPromise;
-  console.log('DEBUG • Connecting to Mongo...');
+  console.log('DEBUG • Connecting to Mongo…');
   connPromise = mongoose.connect(MONGO_URI, {
     serverSelectionTimeoutMS: 8000,
     connectTimeoutMS:        8000,
@@ -29,7 +27,6 @@ async function connectDB() {
   console.log('DEBUG • Connected to Mongo');
   return connPromise;
 }
-/* ---------------------------------- */
 
 /* ---------- Schema & model ---------- */
 const postSchema = new mongoose.Schema({
@@ -39,9 +36,8 @@ const postSchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now },
 });
 const Post = mongoose.models.Post || mongoose.model('Post', postSchema);
-/* ------------------------------------- */
 
-/* ---------- Routes (match both) ---------- */
+/* ---------- Routes (work local & prod) ---------- */
 app.get(['/posts', '/api/posts'], async (req, res) => {
   await connectDB();
   const filter = req.query.tag ? { tags: req.query.tag } : {};
@@ -55,7 +51,6 @@ app.post(['/posts', '/api/posts'], async (req, res) => {
   await Post.create({ title, content, tags });
   res.status(201).json({ message: 'Post created successfully' });
 });
-/* ----------------------------------------- */
 
 /* ---------- Export for Vercel ---------- */
 module.exports = async (req, res) => {
@@ -68,11 +63,9 @@ module.exports = async (req, res) => {
 
   return serverless(app)(req, res);
 };
-/* --------------------------------------- */
 
 /* ---------- Local dev ---------- */
 if (require.main === module) {
   const PORT = process.env.PORT || 3000;
   app.listen(PORT, () => console.log(`Local API listening on ${PORT}`));
 }
-/* -------------------------------- */
