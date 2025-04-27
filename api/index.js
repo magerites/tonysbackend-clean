@@ -46,14 +46,14 @@ const Post = mongoose.models.Post || mongoose.model('Post', postSchema);
 /* ------------------------------------- */
 
 /* ---------- Routes ---------- */
-app.get('/posts', async (req, res) => {
+app.get('/api/posts', async (req, res) => {
   await connectDB();
   const filter = req.query.tag ? { tags: req.query.tag } : {};
   const posts  = await Post.find(filter).sort({ createdAt: -1 });
   res.json(posts);
 });
 
-app.post('/posts', async (req, res) => {
+app.post('/api/posts', async (req, res) => {
   await connectDB();
   const { title, content, tags } = req.body;
   await Post.create({ title, content, tags });
