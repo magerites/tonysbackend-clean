@@ -68,6 +68,53 @@
 
     <button type="submit">Submit Post</button>
   </form>
+<hr>
+<h2>Existing Posts</h2>
+<table id="postsTable"></table>
+
+<script>
+async function refreshPostsTable() {
+  const res  = await fetch('/posts');
+  const data = await res.json();
+  const tbl  = document.getElementById('postsTable');
+  tbl.innerHTML = `
+    <tr><th>Title</th><th>Actions</th></tr>
+    ${data.map(p => `
+      <tr>
+        <td>${p.title}</td>
+        <td>
+          <button onclick="editPost('${p.id}')">edit</button>
+          <button onclick="deletePost('${p.id}')">delete</button>
+        </td>
+      </tr>`).join('')}
+  `;
+}
+
+async function editPost(id) {
+  const title   = prompt('New title?');
+  if (title == null) return;
+  const content = prompt('New HTML content?');
+  if (content == null) return;
+  const tags    = prompt('comma-separated tags').split(',').map(t => t.trim());
+
+  const r = await fetch(`/posts/${id}`, {
+    method:'PATCH',
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({ title, content, tags })
+  });
+  alert(await r.text());
+  refreshPostsTable();
+}
+
+async function deletePost(id) {
+  if (!confirm('Delete this post?')) return;
+  const r = await fetch(`/posts/${id}`, { method:'DELETE' });
+  alert(await r.text());
+  refreshPostsTable();
+}
+
+document.addEventListener('DOMContentLoaded', refreshPostsTable);
+</script>
 
   <script>
     document.addEventListener('DOMContentLoaded', () => {

@@ -67,7 +67,13 @@ app.post('/posts', async (req, res) => {
     if (!title || !content) return res.status(400).json({ message: 'title & content required' });
 
     const current = await downloadPosts();
-    const newPost = { title, content, tags, createdAt: new Date().toISOString() };
+    const newPost = {
+  id: crypto.randomUUID(),     // NEW
+  title,
+  content,
+  tags,
+  createdAt: new Date().toISOString()
+};
     await pushJsonToNeocities([newPost, ...current]);
 
     res.status(201).json({ message: 'Post created & Neocities updated!' });
@@ -81,7 +87,38 @@ app.get('/posts', async (_req, res) => {
   const posts = await downloadPosts();
   res.json(posts);
 });
+app.patch('/posts/:id', async (req, res) => {
+  try {
+    const { id }     = req.params;
+    const { title, content, tags = [] } = req.body;
 
+    const posts = await downloadPosts();
+    const idx   = posts.findIndex(p => p.id === id);
+    if (idx === -1) return res.status(404).json({ message: 'Post not found' });
+
+    posts[idx] = { ...posts[idx], title, content, tags };
+    await pushJsonToNeocities(posts);
+    res.json({ message: 'Post updated & Neocities synced!' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Error updating post' });
+  }
+});
+app.delete('/posts/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const posts  = await downloadPosts();
+    const updated = posts.filter(p => p.id !== id);
+    if (posts.length === updated.length)
+      return res.status(404).json({ message: 'Post not found' });
+
+    await pushJsonToNeocities(updated);
+    res.json({ message: 'Post deleted & Neocities synced!' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Error deleting post' });
+  }
+});
 /* ---------- Start ---------- */
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log('API listening on ' + PORT));
