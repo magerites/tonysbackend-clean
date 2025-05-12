@@ -50,7 +50,6 @@ async function pushJsonToNeocities(postsArray) {
   console.log('✅  Neocities upload succeeded');
 }
 
-}
 
 /* ---------- Express ---------- */
 const app = express();
