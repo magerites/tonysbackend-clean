@@ -29,10 +29,10 @@ async function pushJsonToNeocities(postsArray) {
 
   const form = new FormData();
   // no api_key field here
-  form.append('files[posts.json]', json, {
-    filename: 'posts.json',
-    contentType: 'application/json',
-  });
+form.append('posts.json', json, {
+  filename: 'posts.json',
+  contentType: 'application/json',
+});
 
   const r = await fetch('https://neocities.org/api/upload', {
     method: 'POST',
