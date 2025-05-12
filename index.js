@@ -28,7 +28,7 @@ async function pushJsonToNeocities(postsArray) {
   const json = JSON.stringify(postsArray, null, 2);
 
   const form = new FormData();
-  form.append('api_key', NEOCITIES_API_KEY);
+  // no api_key field here
   form.append('files[posts.json]', json, {
     filename: 'posts.json',
     contentType: 'application/json',
@@ -36,13 +36,20 @@ async function pushJsonToNeocities(postsArray) {
 
   const r = await fetch('https://neocities.org/api/upload', {
     method: 'POST',
+    headers: {
+      // Bearer token auth
+      Authorization: `Bearer ${process.env.NEOCITIES_API_KEY}`
+    },
     body: form,
   });
+
   const data = await r.json();
   if (data.result !== 'success') {
     throw new Error('Neocities upload failed: ' + JSON.stringify(data));
   }
   console.log('✅  Neocities upload succeeded');
+}
+
 }
 
 /* ---------- Express ---------- */
